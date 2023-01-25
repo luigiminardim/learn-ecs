@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 
-export default function Home({ hostname }) {
+export default function Home({ host, nginxMessage }) {
   return (
     <div className={styles.container}>
       <Head>
@@ -13,7 +13,8 @@ export default function Home({ hostname }) {
         <h1 className={styles.title}>
           Welcome to <a href="https://nextjs.org">Next.js</a> on Luigi's Docker!
         </h1>
-        <p>You are at {hostname}</p>
+        <p>You are at {host}</p>
+        <p>Nginx sad: {nginxMessage}</p>
       </main>
     </div>
   )
@@ -21,10 +22,12 @@ export default function Home({ hostname }) {
 
 /** Get the hostname */
 export const getServerSideProps = async (context) => {
-  const hostname = context.req.headers.host;
+  const { host, 'nginx-message': nginxMessage } = context.req.headers;
+  console.log(context.req.headers)
   return {
     props: {
-      hostname,
+      host,
+      nginxMessage
     },
   }
 }

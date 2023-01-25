@@ -1,0 +1,17 @@
+version: "latest"
+
+services:
+  nextjs:
+    build: .
+    ports:
+      - 3000:3000
+
+  nginx:
+    depends_on:
+      - nextjs
+    image: nginx:1.23.3
+    command: nginx -g 'daemon off;'
+    ports:
+      - 8080:80
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
