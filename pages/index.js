@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 
-export default function Home({ host, nginxMessage }) {
+export default function Home({ host, nginxMessage, customEnv }) {
   return (
     <div className={styles.container}>
       <Head>
@@ -15,6 +15,7 @@ export default function Home({ host, nginxMessage }) {
         </h1>
         <p>You are at {host}</p>
         <p>Nginx sad: {nginxMessage}</p>
+        <p>Custom env: {customEnv}</p>
       </main>
     </div>
   )
@@ -23,11 +24,15 @@ export default function Home({ host, nginxMessage }) {
 /** Get the hostname */
 export const getServerSideProps = async (context) => {
   const { host, 'nginx-message': nginxMessage } = context.req.headers;
-  console.log(context.req.headers)
+  const proc = process;
+  const customEnv = proc.env.CUSTOM_ENV;
+  console.log('proc.env.CUSTOM_ENV', proc.env.CUSTOM_ENV)
+  console.log('process.env.CUSTOM_ENV', process.env.CUSTOM_ENV)
   return {
     props: {
       host,
-      nginxMessage
+      nginxMessage,
+      customEnv
     },
   }
 }

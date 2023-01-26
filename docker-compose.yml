@@ -5,13 +5,15 @@ services:
     build: .
     ports:
       - 3000:3000
+    environment:
+      CUSTOM_ENV: "custom_env"
 
   nginx:
     depends_on:
       - nextjs
+    build:
+      context: .
+      dockerfile: nginx.Dockerfile
     image: nginx:1.23.3
-    command: nginx -g 'daemon off;'
     ports:
       - 8080:80
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
