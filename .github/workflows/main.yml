@@ -1,13 +1,4 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-# GitHub recommends pinning actions to a commit SHA.
-# To get a newer version, you will need to update the SHA.
-# You can also reference a tag or branch, but the action may change without warning.
-
-name: Deploy to Amazon ECS
+name: Deploy Nextjs to Amazon ECS
 
 on:
   push:
@@ -15,22 +6,18 @@ on:
       - main
   workflow_dispatch:
 
-env:
-  AWS_REGION: us-east-2
-  ECR_REPOSITORY: learn-ecs
-  NGINX_ECR_REPOSITORY: learn-ecs-nginx
-  ECS_SERVICE: learn-ecs
-  ECS_CLUSTER: learn-ecs-cluster
-  ECS_TASK_DEFINITION: .aws/task-definition.json
-  NGINX_TASK_DEFINITION: .aws/nginx-task-definition.json
-  CONTAINER_NAME: learn-ecs
-
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
     environment: production
-
+    env:
+      AWS_REGION: us-east-2
+      ECR_REPOSITORY: learnecs-nextjs
+      ECS_SERVICE: nextjs
+      ECS_CLUSTER: learnecs-cluster
+      ECS_TASK_DEFINITION: .aws/task-definitions/nextjs.json
+      CONTAINER_NAME: nextjs
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -46,8 +33,8 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@aaf69d68aa3fb14c1d5a6be9ac61fe15b48453a2
 
-      - name: Build, tag, and push Nextjs image to Amazon ECR
-        id: build-nextjs-image
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
@@ -59,47 +46,18 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      - name: Build, tag, and push Nginx image to Amazon ECR
-        id: build-nginx-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          # Build a docker container and
-          # push it to ECR so that it can
-          # be deployed to ECS.
-          docker build -t $ECR_REGISTRY/$NGINX_ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$NGINX_ECR_REPOSITORY:$IMAGE_TAG
-          echo "image=$ECR_REGISTRY/$NGINX_ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-
-      - name: Fill in the new Nextjs image ID in the Amazon ECS task definition
-        id: nextjs-task-def
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ env.ECS_TASK_DEFINITION }}
           container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-nextjs-image.outputs.image }}
+          image: ${{ steps.build-image.outputs.image }}
 
-      - name: Fill in the new Nginx image ID in the Amazon ECS task definition
-        id: nginx-task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-nginx-image.outputs.image }}
-
-      - name: Deploy Amazon ECS Nextjs task definition
+      - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ${{ steps.nextjs-task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
-
-      - name: Deploy Amazon ECS Nginx task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.nginx-task-def.outputs.task-definition }}
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
