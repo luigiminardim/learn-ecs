@@ -13,9 +13,9 @@ jobs:
     environment: production
     env:
       AWS_REGION: us-east-1
-      ECR_REPOSITORY: learnecs-nextjs
+      ECR_REPOSITORY: learn/nextjs
       ECS_SERVICE: nextjs
-      ECS_CLUSTER: learnecs
+      ECS_CLUSTER: learn
       ECS_TASK_DEFINITION: .aws/task-definitions/nextjs.json
       CONTAINER_NAME: nextjs
     steps:
@@ -54,10 +54,10 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
 
-      - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
+      # - name: Deploy Amazon ECS task definition
+      #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      #   with:
+      #     task-definition: ${{ steps.task-def.outputs.task-definition }}
+      #     service: ${{ env.ECS_SERVICE }}
+      #     cluster: ${{ env.ECS_CLUSTER }}
+      #     wait-for-service-stability: true
