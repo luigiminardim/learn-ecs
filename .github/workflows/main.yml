@@ -8,7 +8,7 @@ on:
 
 jobs:
   nextjs-deploy:
-    name: Deploy
+    name: Deploy Nextjs
     runs-on: ubuntu-latest
     environment: production
     env:
@@ -63,7 +63,7 @@ jobs:
           wait-for-service-stability: true
 
   deploy-nginx:
-    name: Deploy
+    name: Deploy Nginx
     runs-on: ubuntu-latest
     environment: production
     env:
