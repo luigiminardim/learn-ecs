@@ -15,7 +15,7 @@ jobs:
       AWS_REGION: us-east-1
       ECR_NEXTJS_REPOSITORY: learnecs/nextjs
       ECR_NGINX_REPOSITORY: learnecs/nginx
-      ECS_SERVICE: nextjs-and-nginx
+      ECS_SERVICE: nextjs-and-ngix
       ECS_CLUSTER: learnecs
       ECS_TASK_DEFINITION: .aws/task-definitions/nextjs-and-nginx.json
       NEXTJS_CONTAINER_NAME: nextjs
